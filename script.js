@@ -1,4 +1,4 @@
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxCam3DDtlgeG0F_0QLGNiPpFhE-mSG6fXx4qtKaWOwhVLaO-103_Je8CWQ7KRzAJYPqA/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4nXCFt0TdpB7c3LkI2UWQ_OGYcVXM5DtIVaPJwNyFudUR5Xepwr5qfReYiaSePs5djA/exec";
 
 const rawQuestions = [
     { q: "1. The engineer ............ the network system for the last four hours.", options: ["has been repaired", "was repaired", "has repaired", "repaired"] },
@@ -157,17 +157,26 @@ function submitExam() {
         submittedAt: new Date().toLocaleString()
     };
 
+    const formBody = Object.keys(payload).map(key => {
+        if (typeof payload[key] === 'object') {
+            return encodeURIComponent(key) + '=' + encodeURIComponent(JSON.stringify(payload[key]));
+        }
+        return encodeURIComponent(key) + '=' + encodeURIComponent(payload[key]);
+    }).join('&');
+
     fetch(SCRIPT_URL, {
         method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-    }).then(() => {
-        showSubmittedScreen();
-    }).catch(err => {
-        console.error(err);
-        showSubmittedScreen();
-    });
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formBody
+    }).then(response => response.text())
+      .then(result => {
+          console.log("Success:", result);
+          showSubmittedScreen();
+      })
+      .catch(err => {
+          console.error("Error:", err);
+          showSubmittedScreen();
+      });
 }
 
 function showSubmittedScreen() {
